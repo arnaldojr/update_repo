@@ -1,8 +1,8 @@
 #!/bin/sh
 
 echo "Atualizando start_turtle.sh"
-rm -rf /usr/bin/start_turtle.sh
-cp ~/update_repo/start_turtle.sh /usr/bin/start_turtle.sh
+sudo rm -rf /usr/bin/start_turtle.sh
+sudo cp ~/update_repo/start_turtle.sh /usr/bin/start_turtle.sh
 
 echo "Exclui repositorios bumper, servo_camera e servo_arm antigos"
 rm -rf ~/catkin_ws/src/bumper

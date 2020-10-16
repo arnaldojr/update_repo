@@ -11,3 +11,5 @@ cd /home/ubuntu/catkin_ws/src/servo_camera
 git pull
 echo "Repositórios atualizados."
 date >> ~/update_repo.txt
+
+echo 0

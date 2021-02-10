@@ -3,6 +3,8 @@
 echo "Atualizando start_turtle.sh"
 sudo rm -rf /usr/bin/start_turtle.sh
 sudo cp ~/update_repo/start_turtle.sh /usr/bin/start_turtle.sh
+sudo rm -rf /lib/systemd/system/start_turtle.service
+sudo cp ~/update_repo/start_turtle.service /lib/systemd/system/
 
 echo "Exclui repositorios bumper, servo_camera e servo_arm antigos"
 rm -rf ~/catkin_ws/src/bumper
@@ -22,6 +24,7 @@ catkin_make
 echo "Repositorios atualizados"
 
 echo "Restart dos serviços do robo"
-sudo systemctl restart start_turtle.service
-
+sudo systemctl stop start_turtle.service
+sudo systemctl start start_turtle.service
+sudo systemctl enable start_turtle.service
 echo "Fim"

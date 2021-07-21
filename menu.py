@@ -4,21 +4,25 @@
 #Date: 06-28-2021
 
 #imports
+import RPi.GPIO as GPIO
 import socket
 import os
 import time
 import Adafruit_GPIO.SPI as SPI
 import Adafruit_SSD1306
-import Image
-import ImageDraw
-import ImageFont
-from sensor_msgs import BatteryState
+from PIL import Image
+from PIL import ImageDraw
+from PIL import ImageFont
+
+
+
 # Raspberry Pi pin configuration:
 RST = 24
 DC = 23
 SPI_PORT = 0
 SPI_DEVICE = 0
-
+menu = 0
+channel = None
 # 128x64 display with hardware I2C:
 disp = Adafruit_SSD1306.SSD1306_128_64(rst=RST)
 
@@ -67,53 +71,45 @@ GPIO.setup(gpio_pin_left, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(gpio_pin_right, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 
-# Write two lines of text.
-draw.text((x, top),    'Hello',  font=font, fill=255)
-draw.text((x, top+20), 'World!', font=font, fill=255)
-
 # Display image.
 disp.image(image)
 disp.display()
 
-menu=0
-GPIO.add_event_detect(gpio_pin_up, GPIO.FALLING, callback = limpa_tela(menu),bouncetime=300)
-GPIO.add_event_detect(gpio_pin_down, GPIO.FALLING, callback = stop_robot(menu),bouncetime=300)
-GPIO.add_event_detect(gpio_pin_left, GPIO.FALLING, callback = shutdown_robot(menu),bouncetime=300)
-GPIO.add_event_detect(gpio_pin_right, GPIO.FALLING, callback = reboot_nodes(menu),bouncetime=300)        
 
-while True:
-    limpa_tela()
-    if menu == 0:
-        hostname = socket.gethostname() 
-        ip_address = socket.gethostbyname(hostname)
+def stop_robot(channel):
+    global menu
+    menu = 10
+    if menu ==10:
+        print("menu= ",menu)
+        print("entrei no stop_robot")
+        print("menu= ",menu)    
+
         draw.rectangle((0,0,width,height), outline=0, fill=0)
-        draw.text((x, 0),"    {}            ".format(hostname),font=font,fill=255)
-        draw.text((x,20),"    {}            ".format(ip_address),font=font,fill=255)
-        draw.text((x, 40),"                 ",font=font,fill=255)
+        draw.text((x, 0),"     STOPING          ",font=font,fill=255)
+        draw.text((x,20),"     INSPERBOT         ",font=font,fill=255)
+        draw.text((x, 40),"                     ",font=font,fill=255)
 
-    
+        os.system("rostopic pub -1 /cmd_vel geometry_msgs/Twist -- '[0.0, 0.0, 0.0]' '[0.0, 0.0, 0.0]'")  
+        time.sleep(3)
+        menu=0
+    return 
+   
 
+def shutdown_robot(channel):
+    global menu
 
-def stop_robot(menu):
-
-    os.system("rostopic pub -1 /cmd_vel geometry_msgs/Twist -- '[0.0, 0.0, 0.0]' '[0.0, 0.0, 0.0]'")        
-    draw.rectangle((0,0,width,height), outline=0, fill=0)
-    draw.text((x, 0),"     STOPING          ",font=font,fill=255)
-    draw.text((x,20),"     INSPERBOT         ",font=font,fill=255)
-    draw.text((x, 40),"                     ",font=font,fill=255)
-    time.sleep(5)
-    menu=0
-    return (menu)
-
-def shutdown_robot(menu):
+    print("menu= ",menu)	
+    print("entrei no shutdown_robot")
     menu=menu-30
+    print("menu= ",menu)
     if menu==-30:
         draw.rectangle((0,0,width,height), outline=0, fill=0)
         draw.text((x, 0),"     SHUTDOWN          ",font=font,fill=255)
         draw.text((x,20),"     INSPERBOT         ",font=font,fill=255)
         draw.text((x, 40),"  Press \/ to confirm ",font=font,fill=255)
-    
+    	
     if menu==-60:
+        print("menu= ",menu)
         draw.rectangle((0,0,width,height), outline=0, fill=0)
         draw.text((x, 0),"                               ",font=font,fill=255)
         draw.text((x,20),"                               ",font=font,fill=255)
@@ -121,32 +117,56 @@ def shutdown_robot(menu):
         time.sleep(1)
         os.system("sudo shutdown now") 
         menu=0               
-    return (menu)
+    return 
 
 
-def reboot_nodes(menu):
+def reboot_nodes(channel):
+    global menu
+    print("menu= ",menu)
     menu=menu+30
-
+    print("entrei no reboot_nodes")
+    print("menu= ",menu)
     if menu==30:
         draw.rectangle((0,0,width,height), outline=0, fill=0)
-        draw.text((x, 0),"     REBOOT          ",font=font,fill=255)
-        draw.text((x,20),"    ROS NODES         ",font=font,fill=255)
-        draw.text((x, 40),"  Press < to confirm ",font=font,fill=255)
-        
+        draw.text((x, 0),"       REBOOT          ",font=font,fill=255)
+        draw.text((x,10),"      ROS NODES         ",font=font,fill=255)
+        draw.text((x, 30),"Press button again... ",font=font,fill=255)
+        draw.text((x, 40),".. to confirm ",font=font,fill=255)       
     if menu==60:
+        print("Reiniciando os nodes, aguarde a musiquinha") 
         draw.rectangle((0,0,width,height), outline=0, fill=0)
         draw.text((x, 0),"    REBOTING                ",font=font,fill=255)
         draw.text((x,20),"    ROS NODES ...          ",font=font,fill=255)
-        draw.text((x, 40),"                              ",font=font,fill=255)
-        os.system("sudo systemctl restart start_turtle.service")  
+        draw.text((x, 40),"Wait for the music        ",font=font,fill=255)
+        os.system("sudo systemctl restart start_turtle.service")         
+        menu=0
         time.sleep(5)
-        menu=0
-    return (menu)
 
-def limpa_tela():
-        # Draw the image buffer.
-        disp.image(image)
-        disp.display()
-        time.sleep(0.5)
+    return 
+
+def limpa_tela(channel):
+    # Draw the image buffer.
+    disp.image(image)
+    disp.display()
+    time.sleep(0.5)
+    return 
+
+
+GPIO.add_event_detect(gpio_pin_up, GPIO.FALLING, callback = limpa_tela,bouncetime=300)
+GPIO.add_event_detect(gpio_pin_down, GPIO.FALLING, callback = shutdown_robot,bouncetime=300)
+GPIO.add_event_detect(gpio_pin_left, GPIO.FALLING, callback = stop_robot,bouncetime=300)
+GPIO.add_event_detect(gpio_pin_right, GPIO.FALLING, callback = reboot_nodes,bouncetime=300)        
+
+while True:
+    limpa_tela(channel)
+    if menu == 0:
+        hostname = socket.gethostname() 
+        ip_address = socket.gethostbyname(hostname)
+        draw.rectangle((0,0,width,height), outline=0, fill=0)
+        draw.text((x, 0),"    {}            ".format(hostname),font=font,fill=255)
+        draw.text((x,20),"    {}            ".format(ip_address),font=font,fill=255)
+        draw.text((x, 40),"                 ",font=font,fill=255)
         menu=0
-        return (menu)
+    
+
+

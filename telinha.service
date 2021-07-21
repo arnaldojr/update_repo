@@ -1,0 +1,16 @@
+#systemctl enable telinha.service
+
+
+[Unit]
+Description=telinha
+After=network.target
+
+[Service]
+User=ubuntu
+Type=forking
+ExecStart=python3 /home/ubuntu/catkin_ws/src/update_repo/menu.py
+StandardOutput=journal
+
+[Install]
+WantedBy=multi-user.target 
+

@@ -2,9 +2,11 @@
 
 echo "Atualizando start_turtle.sh"
 sudo rm -rf /usr/bin/start_turtle.sh
-sudo cp ~/update_repo/start_turtle.sh /usr/bin/start_turtle.sh
+sudo cp ~/catkin_ws/src/update_repo/start_turtle.sh /usr/bin/start_turtle.sh
 sudo rm -rf /lib/systemd/system/start_turtle.service
-sudo cp ~/update_repo/start_turtle.service /lib/systemd/system/
+sudo rm -rf /lib/systemd/system/telinha.service
+sudo cp ~/catkin_ws/src/update_repo/start_turtle.service /lib/systemd/system/
+sudo cp ~/catkin_ws/src/update_repo/telinha.service /lib/systemd/system/
 
 echo "Exclui repositorios bumper, servo_camera e servo_arm antigos"
 rm -rf ~/catkin_ws/src/bumper
@@ -25,6 +27,9 @@ echo "Repositorios atualizados"
 
 echo "Restart dos serviços do robo"
 sudo systemctl stop start_turtle.service
+sudo systemctl stop telinha.service
 sudo systemctl start start_turtle.service
+sudo systemctl start telinha.service
 sudo systemctl enable start_turtle.service
+sudo systemctl enable telinha.service
 echo "Fim"

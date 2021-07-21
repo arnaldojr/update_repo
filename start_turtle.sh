@@ -17,8 +17,8 @@ screen -S ROBO -X screen -t BUMPER bash -ic "rosrun bumper bumper"
 sleep 1
 screen -S ROBO -X screen -t CAMERA bash -ic "python3 /home/ubuntu/camera.py"
 sleep 1
-screen -S ROBO -X screen -t TELINHA bash -ic "python3 /home/ubuntu/catkin_ws/src/update_repo/menu.py"
-sleep 1
+#screen -S ROBO -X screen -t TELINHA bash -ic "python3 /home/ubuntu/catkin_ws/src/update_repo/menu.py"
+#sleep 1
 screen -S ROBO -X screen -t BEEP bash -ic "rostopic pub -1 /sound turtlebot3_msgs/Sound 'value: 1'"
 
 

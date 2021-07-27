@@ -1,5 +1,7 @@
 #!/bin/bash
 echo "Atualizando repositorios..." >> ~/update_repo.txt
+cd /home/ubuntu/update_repo
+git pull
 echo "atualizando repositorio git bumper." >> ~/update_repo.txt
 cd /home/ubuntu/catkin_ws/src/bumper
 git pull
